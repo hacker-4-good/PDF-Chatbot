@@ -1,15 +1,15 @@
-# GOOGLE_API_KEY = 'AIzaSyD72YPdCNT8fDf7dfufDX6UZqj1_EhsPys'
 import tempfile
 import streamlit as st
 from langchain_community.document_loaders import PyPDFLoader
 import os
-import chromadb
 from langchain_community.vectorstores.chroma import Chroma
 from langchain_google_genai import GoogleGenerativeAI, GoogleGenerativeAIEmbeddings
 from dotenv import load_dotenv
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
 from langchain import hub 
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+
 
 load_dotenv()
 
@@ -29,8 +29,10 @@ def pdf_loader(pdf):
 
 # RAG chain for sending the loaded document into the llm for genetrating the response 
 def RAG_chain(document, query):
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=100, chunk_overlap=20)
+    splits = text_splitter.split_documents(documents=document)
     vectorstore = Chroma.from_documents(
-        documents = document, 
+        documents = splits, 
         embedding = GoogleGenerativeAIEmbeddings(model='models/embedding-001')
     )
     retriever = vectorstore.as_retriever() 
