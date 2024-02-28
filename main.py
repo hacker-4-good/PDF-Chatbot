@@ -7,7 +7,7 @@ from langchain_google_genai import GoogleGenerativeAI, GoogleGenerativeAIEmbeddi
 from dotenv import load_dotenv
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
-from langchain.prompts import PromptTemplate
+from langchain.prompts import ChatPromptTemplate
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 
@@ -29,7 +29,7 @@ def pdf_loader(pdf):
 
 # RAG chain for sending the loaded document into the llm for genetrating the response 
 def RAG_chain(document, query):
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=100, chunk_overlap=20)
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
     splits = text_splitter.split_documents(documents=document)
     vectorstore = Chroma.from_documents(
         documents = splits, 
@@ -41,9 +41,10 @@ def RAG_chain(document, query):
     {context}
     from the above context answer the user query [{question}] in a best possible way
     """
-    prompt = PromptTemplate.from_template(
-        
+    prompt = ChatPromptTemplate.from_template(
+        template=template
     )
+    
     llm = GoogleGenerativeAI(
         model='models/text-bison-001'
     )
