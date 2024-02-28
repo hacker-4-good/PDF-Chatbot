@@ -7,7 +7,7 @@ from langchain_google_genai import GoogleGenerativeAI, GoogleGenerativeAIEmbeddi
 from dotenv import load_dotenv
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
-from langchain import hub 
+from langchain.prompts import PromptTemplate
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 
@@ -33,10 +33,17 @@ def RAG_chain(document, query):
     splits = text_splitter.split_documents(documents=document)
     vectorstore = Chroma.from_documents(
         documents = splits, 
-        embedding = GoogleGenerativeAIEmbeddings(model='models/embedding-001')
+        embedding = GoogleGenerativeAIEmbeddings(model='models/embedding-001'),
+        persist_directory='PDF-Chatbot/db'
     )
     retriever = vectorstore.as_retriever() 
-    prompt = hub.pull('rlm/rag-prompt')
+    template = """
+    {context}
+    from the above context answer the user query [{question}] in a best possible way
+    """
+    prompt = PromptTemplate.from_template(
+        
+    )
     llm = GoogleGenerativeAI(
         model='models/text-bison-001'
     )
